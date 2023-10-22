@@ -1,0 +1,1 @@
+pyinstaller --onefile --noconsole --icon=kreky.ico --add-data "tray_logo.png;data" .\spotifyControls.py
