@@ -46,6 +46,7 @@ def attemptSetConfig():
     global toggle_repeat_bind
     global seek_forw_bind
     global seek_backw_bind
+
     # Check if the 'spotify_controls.ini' file exists
     if not os.path.isfile('spotify_controls.ini'):
         # If it doesn't exist, create it and set the initial configuration
@@ -58,13 +59,16 @@ def attemptSetConfig():
                             'toggle_shuffle_bind': toggle_shuffle_bind,
                             'toggle_repeat_bind': toggle_repeat_bind,
                             'seek_forw_bind': seek_forw_bind,
-                            'seek_backw_bind': seek_backw_bind}
+                            'seek_backw_bind': seek_backw_bind
+                            }
+
         # Write the configuration to the 'spotify_controls.ini' file
         with open('spotify_controls.ini', 'w') as configfile:
             config.write(configfile)
 
 
 def readConfig():
+    # Define global variables that will store the configuration values
     global pause_bind
     global vol_up_bind
     global vol_down_bind
@@ -75,8 +79,14 @@ def readConfig():
     global toggle_repeat_bind
     global seek_forw_bind
     global seek_backw_bind
+    
+    # Read the configuration from 'spotify_controls.ini' file
     config.read('spotify_controls.ini')
+    
+    # Access the 'hotkeys' section in the configuration
     hotkeys = config['hotkeys']
+
+    # Retrieve and assign the values of each configuration setting
     pause_bind = hotkeys['pause_bind']
     vol_up_bind = hotkeys['vol_up_bind']
     vol_down_bind = hotkeys['vol_down_bind']
@@ -90,18 +100,35 @@ def readConfig():
     
         
 def get_pid_from_hwnd(hwnd):
+    # Create a variable to store the process ID
     process_id = ctypes.wintypes.DWORD()
+
+    # Call the Windows API function to get the process ID associated with the given window handle
     ctypes.windll.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(process_id))
+
+    # Return the process ID as an integer value
     return process_id.value
 
-def sendKeysToSpotify(keys):
+def send_keys_to_spotify(keys):
+    # Get window handles for all running windows of Spotify
     hwnds = get_window_hwnds_by_executable_name('spotify.exe')
-    hwnd = hwnds[0]
+
+    # Choose the first Spotify window 
+    hwnd = hwnds[0] 
     #print('hwnd: ' + str(hwnd))
+
+    # Check if a valid window handle was obtained
     if ((hwnd != 0) and (hwnd != None)):
+        # Get the process ID associated with the window handle
         pid = get_pid_from_hwnd(hwnd)
+
+        # Connect to the Spotify application using the process ID
         app = pywinauto.Application().connect(process=pid)
+
+        # Set keyboard focus to the Spotify window
         window = app.Chrome_WidgetWin_0.set_keyboard_focus()
+
+        # Send the specified keys to the Spotify window 
         window.send_keystrokes(keys, with_spaces=True, with_tabs=True, with_newlines=True)
 
     
@@ -147,6 +174,8 @@ def get_window_hwnds_by_executable_name(target_executable_name):
     
     
 def spotifyHide():
+    # this isnt ready yet
+    # TODO: fix this
     #print("spotify hide")
     hwnds = get_window_hwnds_by_executable_name('spotify.exe')
     #print('hwnds: ' + str(hwnds))
@@ -158,20 +187,22 @@ def spotifyHide():
         ctypes.windll.user32.ShowWindow(hwnd, SW_MINIMIZE)
 
 def bind_keys(label, labal_text, result, result_event):
+    # Update the label with user instructions
     label.configure(text="Press keys to bind...")
+
+    # Initialize a variable to store the key binding
     bind = ''
     while True:
         event = keyboard.read_event()
 
+        # on keydown
         if event.event_type == keyboard.KEY_DOWN:
             #print('keydown:' + event.name)
-            if bind .find(event.name) == -1:
+            # check if key was already added to hotkey
+            if bind.find(event.name) == -1:
+                # if not found add the key
                 bind += '+' 
                 bind += event.name
-
-        if event.event_type == keyboard.KEY_UP:
-            #print('keyup: ' + event.name)
-            break
 
         # clean up the resulting string
         bind = bind.replace('++', '+')
@@ -187,21 +218,45 @@ def bind_keys(label, labal_text, result, result_event):
             if bind[last_index] == '+':
                 bind = bind[:last_index-1]
 
+        # on KEY_UP event
+        if event.event_type == keyboard.KEY_UP:
+            #print('keyup: ' + event.name)
+            # Key release event means hotkey is set; exit the loop
+            break
+
+        # Update the label with the current key binding
         label.configure(text=labal_text + ": " + bind)
 
     #print("returned bind")
+    # Store the final key binding in the result list
     result[0] = bind
+    # signal that result is set and thread has exited 
     result_event.set()
 
+# comments for all the following bind_* functions are the same so i will only comment this one
 def bind_pause(label):
+    # Access the global hotkey variable
     global pause_bind
+
+    # Create an event to signal when the key binding is ready
     result_event = threading.Event()
+
+    # Initialize a list to store the key binding
     result = [None]
+
+    # Create a new thread to run the bind_keys function
     thread = threading.Thread(target=bind_keys, args=(label, "pause", result, result_event))
+
+    # Start the thread to begin key binding
     thread.start()
+
+    # Wait for the key binding to be completed and signaled
     result_event.wait()
+    # Store the obtained hotkey binding in the global variable
     pause_bind = result[0]
+    # activate the hotkeys 
     set_hotkeys()
+    # attempt to save the configuration
     attemptSetConfig()
 
 def bind_vol_up(label):
@@ -306,23 +361,31 @@ def bind_seek_backw(label):
     
 
 def join_server():
+    # Open a web browser and navigate to the specified URL
     webbrowser.open("https://thrallway.com")
 
 def reload_program():
-    current_script = sys.argv[0]  # Get the name of the current script
+    # Get the name of the current script
+    current_script = sys.argv[0]  
+    # Create a subprocess to start the script again 
     subprocess.Popen([sys.executable, current_script])
-    #sys.exit()
-    #quit()
-    #exit()
+    # end currant script instance
     quit2()
     
 def show_credits(app):
+    # Create a pop-up window
     popup = ctk.CTkToplevel(app)
     popup.title("Credits")
     popup.geometry("200x120+200+200")  # Adjust the size and position as needed
-    popup.resizable(False, False)
-    popup.label = ctk.CTkLabel(master=popup, font=ctk.CTkFont(size=15), text="made with the help of:\n- LeopoldPrime\n- SniperAstra\n- Zenith")
+    popup.resizable(False, False) # Make the popup window non-resizable
+
+    # Create a label to display credits
+    popup.label = ctk.CTkLabel(
+        master=popup, font=ctk.CTkFont(size=15), 
+        text="made with the help of:\n- LeopoldPrime\n- SniperAstra\n- Zenith"
+        )
     popup.label.pack(fill=ctk.BOTH, expand=True)
+
     popup.transient(app)  # Makes the popup related to the main window
     popup.grab_set()  # Prevents interaction with the main window while the popup is open
     #app.wait_window(popup)  # Wait for the popup to be closed
@@ -330,15 +393,15 @@ def show_credits(app):
 
 
 def quit2():
-    #quit()
-    #sys.exit()
-    #exit() # works?
+    # i have no clue why but all other methods of exiting either froze the exe, script, or both
     os._exit(0)
 
 def config_gui():
     global thread_lock
+    # make sure only one gui thread is running at a time
     with thread_lock:
         #print('launching config gui...')
+        # Define global variables to be used in the function
         global pause_bind
         global vol_up_bind
         global vol_down_bind
@@ -350,9 +413,11 @@ def config_gui():
         global seek_forw_bind
         global seek_backw_bind
 
+        # Initialize and configure the graphical user interface
         ctk.set_appearance_mode("dark")  
         ctk.set_default_color_theme("blue")  
 
+        # Create the main application window
         app = ctk.CTk()
        # app.geometry("1100x450")
         app.resizable(False, False)
@@ -360,9 +425,12 @@ def config_gui():
         app.grid_rowconfigure(0, weight=1)
         app.grid_columnconfigure(0, weight=1)
 
+        # Create a sidebar for additional stuff
         app.sidebar_frame = ctk.CTkFrame(app, width=140, corner_radius=0)
         app.sidebar_frame.pack(fill="both", side=ctk.LEFT)
         app.sidebar_frame.grid_rowconfigure(4, weight=1)
+
+        # Create labels, buttons, and links in the sidebar
         app.logo_label = ctk.CTkLabel(app.sidebar_frame, text="Spotify Controls", font=ctk.CTkFont(size=20))
         app.logo_label.grid(row=0, column=0, padx=20, pady=(20, 5))
         app.logo_label = ctk.CTkLabel(app.sidebar_frame, text="by _kreken", font=ctk.CTkFont(size=16))
@@ -377,9 +445,11 @@ def config_gui():
         app.sidebar_button_4.grid(row=7, column=0, padx=20, pady=(10, 20))
 
     
+        # Create a main frame for configuring hotkeys
         frame_1 = ctk.CTkFrame(master=app)
         frame_1.pack(pady=20, padx=60, fill="both", expand=True)
 
+        # Create labels and buttons for each hotkey configuration
         macro1_label = ctk.CTkLabel(master=frame_1, text="pause: " + pause_bind)
         macro1_label.grid(row=1, column=0, padx=20, pady=(15, 0))
         macro1_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_pause, args=(macro1_label,)).start())
@@ -430,40 +500,50 @@ def config_gui():
         macro10_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_seek_backw, args=(macro10_label,)).start())
         macro10_button.grid(row=2, column=3, padx=20, pady=(0, 15))
 
+        # Set weights (relative size) for grid rows and columns
         for i in range(10):
             ##print("centering row: " + str(round(i/2)*2) + ', column: ' + str(i))
             frame_1.grid_rowconfigure(round(i/2)*2, weight=2)
             frame_1.grid_rowconfigure(round(i/2)*2+1, weight=2)
             frame_1.grid_columnconfigure(i, weight=2)
-
     
-
-    
+        # Start the main application loop
         app.mainloop()
     
     
 def quit_window(tray_icon, item):
+    # Stop the tray icon (system tray) to prevent weird behavior
     tray_icon.stop()
-    #exit()
+
+    # Call the `quit2` function to perform any additional cleanup or exit actions (aka make it not freeze with exit() lmao)
     quit2()
 
 def show_window(tray_icon, item):
+    # start config gui thread
     threading.Thread(target=config_gui, args=()).start()
 
 def run_tray():
+    # Create the system tray icon and menu
     #print('launching tray...')
     global tray_icon
     try:
+        # Attempt to load an image from a bundled file
         image_path = get_bundled_png_filepath("kreky.png")
         image = Image.open(image_path)
     except:
+        # If loading from the bundled file fails, load from the folder (assume to run as script not compiled)
         image = Image.open("kreky.png")
+
+    # Define the menu items for the system tray icon
     menu = (item('Open Settings', show_window), item('Close', quit_window))
+    # Create the system tray icon with the specified image and menu items
     tray_icon = pystray.Icon("name", image, "spotify controls", menu)
+    # Start running the system tray icon
     tray_icon.run()
 
 def set_hotkeys():
     #print('setting up hotkeys...')
+    # Define global variables to be used in the function
     global pause_bind
     global vol_up_bind
     global vol_down_bind
@@ -474,6 +554,8 @@ def set_hotkeys():
     global toggle_repeat_bind
     global seek_forw_bind
     global seek_backw_bind
+    
+    # define hotkeys that spotify can receive
     TOGGLE_PAUSE      =  '{VK_SPACE}'
     VOLUME_UP         =  '^{VK_UP}'
     VOLUME_DOWN       =  '^{VK_DOWN}'
@@ -486,57 +568,58 @@ def set_hotkeys():
     SEEK_BACKW 		  =  '+{VK_LEFT}'
 
     try:
+        # Unhook any previously set hotkeys
         keyboard.unhook_all_hotkeys()
     except:
         pass
+
     if pause_bind != '':
-        keyboard.add_hotkey(pause_bind,          lambda: sendKeysToSpotify(TOGGLE_PAUSE),    suppress=True, timeout=0, trigger_on_release=False )
+        # Add hotkey for toggling pause with the specified key combination... same thing for other ones, won't comment
+        keyboard.add_hotkey(pause_bind,          lambda: send_keys_to_spotify(TOGGLE_PAUSE),    suppress=True, timeout=0, trigger_on_release=False )
         #print('set pause to ' + pause_bind)
 
     if vol_up_bind != '':
-        keyboard.add_hotkey(vol_up_bind,         lambda: sendKeysToSpotify(VOLUME_UP),       suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(vol_up_bind,         lambda: send_keys_to_spotify(VOLUME_UP),       suppress=True, timeout=0, trigger_on_release=False )
         #print('set volup to ' + vol_up_bind)
 
     if vol_down_bind != '':
-        keyboard.add_hotkey(vol_down_bind,       lambda: sendKeysToSpotify(VOLUME_DOWN),     suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(vol_down_bind,       lambda: send_keys_to_spotify(VOLUME_DOWN),     suppress=True, timeout=0, trigger_on_release=False )
         #print('set voldown to ' + vol_down_bind)
 
     if next_track_bind != '':
-        keyboard.add_hotkey(next_track_bind,     lambda: sendKeysToSpotify(NEXT_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(next_track_bind,     lambda: send_keys_to_spotify(NEXT_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
         #print('set next track to ' + next_track_bind)
 
     if prev_track_bind != '':
-        keyboard.add_hotkey(prev_track_bind,     lambda: sendKeysToSpotify(PREV_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(prev_track_bind,     lambda: send_keys_to_spotify(PREV_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
         #print('set prev track to ' + prev_track_bind)
 
     if like_track_bind != '':
-        keyboard.add_hotkey(like_track_bind,     lambda: sendKeysToSpotify(LIKE_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(like_track_bind,     lambda: send_keys_to_spotify(LIKE_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
         #print('set like track to ' + like_track_bind)
 
     if toggle_shuffle_bind != '':
-        keyboard.add_hotkey(toggle_shuffle_bind, lambda: sendKeysToSpotify(TOGGLE_SHUFFLE),  suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(toggle_shuffle_bind, lambda: send_keys_to_spotify(TOGGLE_SHUFFLE),  suppress=True, timeout=0, trigger_on_release=False )
         #print('set shuffle to ' + toggle_shuffle_bind)
 
     if toggle_repeat_bind != '':
-        keyboard.add_hotkey(toggle_repeat_bind,  lambda: sendKeysToSpotify(TOGGLE_REPEAT),   suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(toggle_repeat_bind,  lambda: send_keys_to_spotify(TOGGLE_REPEAT),   suppress=True, timeout=0, trigger_on_release=False )
         #print('set repeat to ' + toggle_repeat_bind)
 
     if seek_forw_bind != '':
-        keyboard.add_hotkey(seek_forw_bind,      lambda: sendKeysToSpotify(SEEK_FORWD),      suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(seek_forw_bind,      lambda: send_keys_to_spotify(SEEK_FORWD),      suppress=True, timeout=0, trigger_on_release=False )
         #print('set seek forward to ' + seek_forw_bind)
 
     if seek_backw_bind != '':
-        keyboard.add_hotkey(seek_backw_bind,     lambda: sendKeysToSpotify(SEEK_BACKW),      suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(seek_backw_bind,     lambda: send_keys_to_spotify(SEEK_BACKW),      suppress=True, timeout=0, trigger_on_release=False )
         #print('set seek back to ' + seek_backw_bind)
 
     #keyboard.add_hotkey( 'ctrl+m', spotifyHide, args = ( ) )
 
 
-
-
-
 def main():
     #print('wow this is from the top of main')
+    # Initialize global variables for hotkey bindings
     global pause_bind
     global vol_up_bind
     global vol_down_bind
@@ -548,6 +631,7 @@ def main():
     global seek_forw_bind
     global seek_backw_bind
 
+    # Initialize hotkey bindings to empty strings (prevents error when saving empty hotkeys to config)
     pause_bind = ''
     vol_up_bind = ''
     vol_down_bind = ''
@@ -559,19 +643,27 @@ def main():
     seek_forw_bind = ''
     seek_backw_bind = ''
 
+    # Create a lock for gui thread synchronization
     global thread_lock
     thread_lock = threading.Lock()
     
+    # Check if the configuration file exists
     if os.path.isfile('spotify_controls.ini'):
         #print('config file found')
         #print('reading config...')
+        # Configuration file exists, so read the configuration
         readConfig()
+        # set hotkeys to config
         set_hotkeys()
     else:
         #print('config file not found')
+        # Configuration file doesn't exist, so launch the config GUI in a separate thread
         threading.Thread(target=config_gui, args=()).start()
 
+    # Run the system tray icon
     run_tray()
+
+    # idk why but it would randomly freeze or exit without this part
     global tray_icon
     tray_icon.stop()
 
