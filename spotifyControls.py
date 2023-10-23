@@ -302,6 +302,18 @@ def reload_program():
     #quit()
     #exit()
     quit2()
+    
+def show_credits(app):
+    popup = ctk.CTkToplevel(app)
+    popup.title("Credits")
+    popup.geometry("200x120+200+200")  # Adjust the size and position as needed
+    popup.resizable(False, False)
+    popup.label = ctk.CTkLabel(master=popup, font=ctk.CTkFont(size=15), text="made with the help of:\n- LeopoldPrime\n- SniperAstra\n- Zenith")
+    popup.label.pack(fill=ctk.BOTH, expand=True)
+    popup.transient(app)  # Makes the popup related to the main window
+    popup.grab_set()  # Prevents interaction with the main window while the popup is open
+    #app.wait_window(popup)  # Wait for the popup to be closed
+    
 
 
 def quit2():
@@ -342,12 +354,14 @@ def config_gui():
         app.logo_label.grid(row=0, column=0, padx=20, pady=(20, 5))
         app.logo_label = ctk.CTkLabel(app.sidebar_frame, text="by _kreken", font=ctk.CTkFont(size=16))
         app.logo_label.grid(row=1, column=0, padx=20, pady=(5, 150))
-        app.sidebar_button_1 = ctk.CTkButton(app.sidebar_frame, text="Join Support Server", command=join_server)
-        app.sidebar_button_1.grid(row=5, column=0, padx=20, pady=20)
-        app.sidebar_button_2 = ctk.CTkButton(app.sidebar_frame, text="Reload Hub", command=reload_program)
-        app.sidebar_button_2.grid(row=6, column=0, padx=20, pady=20)
-        app.sidebar_button_3 = ctk.CTkButton(app.sidebar_frame, text="Close Hub", command=quit2)
-        app.sidebar_button_3.grid(row=7, column=0, padx=20, pady=20)
+        app.sidebar_button_1 = ctk.CTkButton(app.sidebar_frame, text="Credits", command=lambda: show_credits(app))
+        app.sidebar_button_1.grid(row=4, column=0, padx=20, pady=10)
+        app.sidebar_button_2 = ctk.CTkButton(app.sidebar_frame, text="Support Server", command=join_server)
+        app.sidebar_button_2.grid(row=5, column=0, padx=20, pady=10)
+        app.sidebar_button_3 = ctk.CTkButton(app.sidebar_frame, text="Reload", command=reload_program)
+        app.sidebar_button_3.grid(row=6, column=0, padx=20, pady=10)
+        app.sidebar_button_4 = ctk.CTkButton(app.sidebar_frame, text="Close", command=quit2)
+        app.sidebar_button_4.grid(row=7, column=0, padx=20, pady=(10, 20))
 
     
         frame_1 = ctk.CTkFrame(master=app)
