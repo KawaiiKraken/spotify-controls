@@ -445,7 +445,7 @@ def run_tray():
         image = Image.open(image_path)
     except:
         image = Image.open("tray_logo.png")
-    menu = (item('Open Hub', show_window), item('Quit Hub', quit_window))
+    menu = (item('Open Settings', show_window), item('Close', quit_window))
     tray_icon = pystray.Icon("name", image, "title", menu)
     tray_icon.run()
 
