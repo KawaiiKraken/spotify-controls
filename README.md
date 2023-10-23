@@ -1,7 +1,7 @@
 # spotify-controls
 control spotify with hotkeys NO PREMIUM REQUIRED
 
-made with the help of LeopoldPrime, SniperAstra, f1Lthz4, Zenith
+made with the help of LeopoldPrime, SniperAstra, Zenith, f1Lthz4
 
 for support join our server at the [MSK](https://thrallway.com) server
 
