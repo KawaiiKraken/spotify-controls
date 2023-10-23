@@ -45,7 +45,7 @@ def attemptSetConfig():
     global toggle_repeat_bind
     global seek_forw_bind
     global seek_backw_bind
-    if not os.path.isfile('spotifyControls.ini'):
+    if not os.path.isfile('spotify_controls.ini'):
         config['hotkeys'] = {'pause_bind': pause_bind,
                             'vol_up_bind': vol_up_bind,
                             'vol_down_bind': vol_down_bind,
@@ -56,7 +56,7 @@ def attemptSetConfig():
                             'toggle_repeat_bind': toggle_repeat_bind,
                             'seek_forw_bind': seek_forw_bind,
                             'seek_backw_bind': seek_backw_bind}
-        with open('spotifyControls.ini', 'w') as configfile:
+        with open('spotify_controls.ini', 'w') as configfile:
             config.write(configfile)
 
 def readConfig():
@@ -70,7 +70,7 @@ def readConfig():
     global toggle_repeat_bind
     global seek_forw_bind
     global seek_backw_bind
-    config.read('spotifyControls.ini')
+    config.read('spotify_controls.ini')
     hotkeys = config['hotkeys']
     pause_bind = hotkeys['pause_bind']
     vol_up_bind = hotkeys['vol_up_bind']
@@ -343,14 +343,14 @@ def config_gui():
         app = ctk.CTk()
        # app.geometry("1100x450")
         app.resizable(False, False)
-        app.title("spotifyControls by _kreken")
+        app.title("Spotify Controls by _kreken")
         app.grid_rowconfigure(0, weight=1)
         app.grid_columnconfigure(0, weight=1)
 
         app.sidebar_frame = ctk.CTkFrame(app, width=140, corner_radius=0)
         app.sidebar_frame.pack(fill="both", side=ctk.LEFT)
         app.sidebar_frame.grid_rowconfigure(4, weight=1)
-        app.logo_label = ctk.CTkLabel(app.sidebar_frame, text="spotifyControls", font=ctk.CTkFont(size=20))
+        app.logo_label = ctk.CTkLabel(app.sidebar_frame, text="Spotify Controls", font=ctk.CTkFont(size=20))
         app.logo_label.grid(row=0, column=0, padx=20, pady=(20, 5))
         app.logo_label = ctk.CTkLabel(app.sidebar_frame, text="by _kreken", font=ctk.CTkFont(size=16))
         app.logo_label.grid(row=1, column=0, padx=20, pady=(5, 150))
@@ -441,12 +441,12 @@ def run_tray():
     #print('launching tray...')
     global tray_icon
     try:
-        image_path = get_bundled_png_filepath("tray_logo.png")
+        image_path = get_bundled_png_filepath("kreky.png")
         image = Image.open(image_path)
     except:
-        image = Image.open("tray_logo.png")
+        image = Image.open("kreky.png")
     menu = (item('Open Settings', show_window), item('Close', quit_window))
-    tray_icon = pystray.Icon("name", image, "title", menu)
+    tray_icon = pystray.Icon("name", image, "spotify controls", menu)
     tray_icon.run()
 
 def set_hotkeys():
@@ -549,7 +549,7 @@ def main():
     global thread_lock
     thread_lock = threading.Lock()
     
-    if os.path.isfile('spotifyControls.ini'):
+    if os.path.isfile('spotify_controls.ini'):
         #print('config file found')
         #print('reading config...')
         readConfig()
