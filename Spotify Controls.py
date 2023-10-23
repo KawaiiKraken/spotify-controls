@@ -31,10 +31,11 @@ def get_bundled_png_filepath(filename):
     return png_file_path
 
 
-
+# Create a ConfigParser object
 config = configparser.ConfigParser()
 def attemptSetConfig():
     #print('setting config...')
+    # Define global variables to be used in the function
     global pause_bind
     global vol_up_bind
     global vol_down_bind
@@ -45,7 +46,9 @@ def attemptSetConfig():
     global toggle_repeat_bind
     global seek_forw_bind
     global seek_backw_bind
+    # Check if the 'spotify_controls.ini' file exists
     if not os.path.isfile('spotify_controls.ini'):
+        # If it doesn't exist, create it and set the initial configuration
         config['hotkeys'] = {'pause_bind': pause_bind,
                             'vol_up_bind': vol_up_bind,
                             'vol_down_bind': vol_down_bind,
@@ -56,8 +59,10 @@ def attemptSetConfig():
                             'toggle_repeat_bind': toggle_repeat_bind,
                             'seek_forw_bind': seek_forw_bind,
                             'seek_backw_bind': seek_backw_bind}
+        # Write the configuration to the 'spotify_controls.ini' file
         with open('spotify_controls.ini', 'w') as configfile:
             config.write(configfile)
+
 
 def readConfig():
     global pause_bind
@@ -74,6 +79,14 @@ def readConfig():
     hotkeys = config['hotkeys']
     pause_bind = hotkeys['pause_bind']
     vol_up_bind = hotkeys['vol_up_bind']
+    vol_down_bind = hotkeys['vol_down_bind']
+    next_track_bind = hotkeys['next_track_bind']
+    prev_track_bind = hotkeys['prev_track_bind']
+    like_track_bind = hotkeys['like_track_bind']
+    toggle_shuffle_bind = hotkeys['toggle_shuffle_bind']
+    toggle_repeat_bind = hotkeys['toggle_repeat_bind']
+    seek_forw_bind = hotkeys['seek_forw_bind']
+    seek_backw_bind = hotkeys['seek_backw_bind']
     
         
 def get_pid_from_hwnd(hwnd):
