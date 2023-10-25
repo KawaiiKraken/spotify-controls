@@ -217,9 +217,9 @@ def set_config():
                         'seek_forw_bind': seek_forw_bind,
                         'seek_backw_bind': seek_backw_bind
                         }
-    config['spotify_creds'] = {'SPOTIPY_CLIENT_ID' : 'enter your client id here',
-                                'SPOTIPY_CLIENT_SECRET' : 'enter your client secret here',
-                                'SPOTIPY_REDIRECT_URI' : 'enter your redirect uri here',
+    config['spotify_creds'] = {'SPOTIPY_CLIENT_ID' : SPOTIPY_CLIENT_ID
+                                'SPOTIPY_CLIENT_SECRET' : SPOTIPY_CLIENT_SECRET
+                                'SPOTIPY_REDIRECT_URI' : SPOTIPY_REDIRECT_URI
                                 }
 
     # Write the configuration to the 'spotify_controls.ini' file
@@ -794,7 +794,6 @@ def set_hotkeys():
 
 
 def main():
-    print('wow this is from the top of main')
     # Initialize global variables for hotkey bindings
     global pause_bind
     global vol_up_bind
@@ -807,7 +806,14 @@ def main():
     global seek_forw_bind
     global seek_backw_bind
     global config
+    global SPOTIPY_CLIENT_ID
+    global SPOTIPY_CLIENT_SECRET
+    global SPOTIPY_REDIRECT_URI
     
+    # obv dont do it HERE, put it in the config file
+    SPOTIPY_CLIENT_ID = 'put you client id here'
+    SPOTIPY_CLIENT_SECRET = 'put you client secret here'
+    SPOTIPY_REDIRECT_URI = 'put you redirect uri here'
 
 
     # Initialize hotkey bindings to empty strings (prevents error when saving empty hotkeys to config)
