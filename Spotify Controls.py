@@ -217,8 +217,8 @@ def set_config():
                         'seek_forw_bind': seek_forw_bind,
                         'seek_backw_bind': seek_backw_bind
                         }
-    config['spotify_creds'] = {'SPOTIPY_CLIENT_ID' : SPOTIPY_CLIENT_ID
-                                'SPOTIPY_CLIENT_SECRET' : SPOTIPY_CLIENT_SECRET
+    config['spotify_creds'] = {'SPOTIPY_CLIENT_ID' : SPOTIPY_CLIENT_ID,
+                                'SPOTIPY_CLIENT_SECRET' : SPOTIPY_CLIENT_SECRET,
                                 'SPOTIPY_REDIRECT_URI' : SPOTIPY_REDIRECT_URI
                                 }
 
