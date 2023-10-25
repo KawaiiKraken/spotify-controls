@@ -48,6 +48,9 @@ def show_toast_notification():
     global SPOTIPY_CLIENT_SECRET
     global SPOTIPY_REDIRECT_URI
     global toast_thread_lock
+    #print('SPOTIPY_CLIENT_ID: ' + SPOTIPY_CLIENT_ID)
+    #print('SPOTIPY_CLIENT_SECRET: ' + SPOTIPY_CLIENT_SECRET)
+    #print('SPOTIPY_REDIRECT_URI: ' + SPOTIPY_REDIRECT_URI)
     with toast_thread_lock:
 
         # Creating the Spotify client with authorization
@@ -187,7 +190,7 @@ def get_bundled_png_filepath(filename):
 # Create a ConfigParser object
 config = configparser.ConfigParser()
 def set_config():
-    print('setting config...')
+    #print('setting config...')
     # Define global variables to be used in the function
     global pause_bind
     global vol_up_bind
@@ -202,7 +205,7 @@ def set_config():
     global SPOTIPY_CLIENT_ID
     global SPOTIPY_CLIENT_SECRET
     global SPOTIPY_REDIRECT_URI
-    print('pause_bind: ' + pause_bind)
+    #print('pause_bind: ' + pause_bind)
 
     # Check if the 'spotify_controls.ini' file exists
     # If it doesn't exist, create it and set the initial configuration
@@ -278,13 +281,13 @@ def get_pid_from_hwnd(hwnd):
     return process_id.value
 
 def send_keys_to_spotify(keys):
-    threading.Thread(target=show_toast_notification).start()
+    #threading.Thread(target=show_toast_notification).start()
     # Get window handles for all running windows of Spotify
     hwnds = get_window_hwnds_by_executable_name('spotify.exe')
 
     # Choose the first Spotify window 
     hwnd = hwnds[0] 
-    print('hwnd: ' + str(hwnd))
+    #print('hwnd: ' + str(hwnd))
 
     # Check if a valid window handle was obtained
     if ((hwnd != 0) and (hwnd != None)):
@@ -303,6 +306,7 @@ def send_keys_to_spotify(keys):
 
         # Send the specified keys to the Spotify window 
         window.send_keystrokes(keys, with_spaces=True, with_tabs=True, with_newlines=True)
+        threading.Thread(target=show_toast_notification).start()
 
     
 def get_window_hwnds_by_executable_name(target_executable_name):
@@ -328,17 +332,17 @@ def get_window_hwnds_by_executable_name(target_executable_name):
                 ctypes.windll.psapi.GetModuleFileNameExA(h_process, 0, executable_path, ctypes.sizeof(executable_path))
                 # Extract the executable name from the path
                 executable_name = os.path.basename(executable_path.value.decode())
-                print(executable_name + "(" + str(hwnd) + ")")
+                #print(executable_name + "(" + str(hwnd) + ")")
                 
                 # Close the process handle
                 ctypes.windll.kernel32.CloseHandle(h_process)
 
                 # Check if the current window's executable name matches the target name
                 if executable_name.lower() == target_executable_name.lower():
-                    print("returned hwnd: " + str(hwnd) + " for exe: " + executable_name + "(" + str(pid) + ")")
+                    #print("returned hwnd: " + str(hwnd) + " for exe: " + executable_name + "(" + str(pid) + ")")
                     window_hwnd.append(hwnd) 
         except Exception as e:
-            print("Error: " + str(e))
+            #print("Error: " + str(e))
             pass
         return True 
     # Enumerate all top-level windows and filter by executable name
@@ -350,9 +354,9 @@ def spotifyHide():
     # this isnt ready yet, 
     # will be used to stop spotify from popping up if it was minimized when send_keys_to_spotify was called
     # TODO: fix this
-    print("spotify hide")
+    #print("spotify hide")
     hwnds = get_window_hwnds_by_executable_name('spotify.exe')
-    print('hwnds: ' + str(hwnds))
+    #print('hwnds: ' + str(hwnds))
     #SW_HIDE = 0
     #SW_RESTORE = 9
     #SW_SHOW = 5
@@ -371,7 +375,7 @@ def bind_keys(label, labal_text, result, result_event):
 
         # on keydown
         if event.event_type == keyboard.KEY_DOWN:
-            print('keydown:' + event.name)
+            #print('keydown:' + event.name)
             # check if key was already added to hotkey
             if bind.find(event.name) == -1:
                 # if not found add the key
@@ -394,14 +398,14 @@ def bind_keys(label, labal_text, result, result_event):
 
         # on KEY_UP event
         if event.event_type == keyboard.KEY_UP:
-            print('keyup: ' + event.name)
+            #print('keyup: ' + event.name)
             # Key release event means hotkey is set; exit the loop
             break
 
         # Update the label with the current key binding
         label.configure(text=labal_text + ": " + bind)
 
-    print("returned bind")
+    #print("returned bind")
     # Store the final key binding in the result list
     result[0] = bind
     # signal that result is set and thread has exited 
@@ -574,7 +578,7 @@ def config_gui():
     global thread_lock
     # make sure only one gui thread is running at a time
     with thread_lock:
-        print('launching config gui...')
+        #print('launching config gui...')
         # Define global variables to be used in the function
         global pause_bind
         global vol_up_bind
@@ -678,7 +682,7 @@ def config_gui():
 
         # Set weights (relative size) for grid rows and columns
         for i in range(10):
-            print("centering row: " + str(round(i/2)*2) + ', column: ' + str(i))
+            #print("centering row: " + str(round(i/2)*2) + ', column: ' + str(i))
             frame_1.grid_rowconfigure(round(i/2)*2, weight=2)
             frame_1.grid_rowconfigure(round(i/2)*2+1, weight=2)
             frame_1.grid_columnconfigure(i, weight=2)
@@ -700,7 +704,7 @@ def show_window(tray_icon, item):
 
 def run_tray():
     # Create the system tray icon and menu
-    print('launching tray...')
+    #print('launching tray...')
     global tray_icon
     try:
         # Attempt to load an image from a bundled file
@@ -718,7 +722,7 @@ def run_tray():
     tray_icon.run()
 
 def set_hotkeys():
-    print('setting up hotkeys...')
+    #print('setting up hotkeys...')
     # Define global variables to be used in the function
     global pause_bind
     global vol_up_bind
@@ -752,43 +756,43 @@ def set_hotkeys():
     if pause_bind != '':
         # Add hotkey for toggling pause with the specified key combination... same thing for other ones, won't comment
         keyboard.add_hotkey(pause_bind,          lambda: send_keys_to_spotify(TOGGLE_PAUSE),    suppress=True, timeout=0, trigger_on_release=False )
-        print('set pause to ' + pause_bind)
+        #print('set pause to ' + pause_bind)
 
     if vol_up_bind != '':
         keyboard.add_hotkey(vol_up_bind,         lambda: send_keys_to_spotify(VOLUME_UP),       suppress=True, timeout=0, trigger_on_release=False )
-        print('set volup to ' + vol_up_bind)
+        #print('set volup to ' + vol_up_bind)
 
     if vol_down_bind != '':
         keyboard.add_hotkey(vol_down_bind,       lambda: send_keys_to_spotify(VOLUME_DOWN),     suppress=True, timeout=0, trigger_on_release=False )
-        print('set voldown to ' + vol_down_bind)
+        #print('set voldown to ' + vol_down_bind)
 
     if next_track_bind != '':
         keyboard.add_hotkey(next_track_bind,     lambda: send_keys_to_spotify(NEXT_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
-        print('set next track to ' + next_track_bind)
+        #print('set next track to ' + next_track_bind)
 
     if prev_track_bind != '':
         keyboard.add_hotkey(prev_track_bind,     lambda: send_keys_to_spotify(PREV_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
-        print('set prev track to ' + prev_track_bind)
+        #print('set prev track to ' + prev_track_bind)
 
     if like_track_bind != '':
         keyboard.add_hotkey(like_track_bind,     lambda: send_keys_to_spotify(LIKE_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
-        print('set like track to ' + like_track_bind)
+        #print('set like track to ' + like_track_bind)
 
     if toggle_shuffle_bind != '':
         keyboard.add_hotkey(toggle_shuffle_bind, lambda: send_keys_to_spotify(TOGGLE_SHUFFLE),  suppress=True, timeout=0, trigger_on_release=False )
-        print('set shuffle to ' + toggle_shuffle_bind)
+        #print('set shuffle to ' + toggle_shuffle_bind)
 
     if toggle_repeat_bind != '':
         keyboard.add_hotkey(toggle_repeat_bind,  lambda: send_keys_to_spotify(TOGGLE_REPEAT),   suppress=True, timeout=0, trigger_on_release=False )
-        print('set repeat to ' + toggle_repeat_bind)
+        #print('set repeat to ' + toggle_repeat_bind)
 
     if seek_forw_bind != '':
         keyboard.add_hotkey(seek_forw_bind,      lambda: send_keys_to_spotify(SEEK_FORWD),      suppress=True, timeout=0, trigger_on_release=False )
-        print('set seek forward to ' + seek_forw_bind)
+        #print('set seek forward to ' + seek_forw_bind)
 
     if seek_backw_bind != '':
         keyboard.add_hotkey(seek_backw_bind,     lambda: send_keys_to_spotify(SEEK_BACKW),      suppress=True, timeout=0, trigger_on_release=False )
-        print('set seek back to ' + seek_backw_bind)
+        #print('set seek back to ' + seek_backw_bind)
 
     #keyboard.add_hotkey( 'ctrl+m', spotifyHide, args = ( ) )
 
