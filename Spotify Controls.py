@@ -47,134 +47,131 @@ def show_toast_notification():
     global SPOTIPY_CLIENT_ID
     global SPOTIPY_CLIENT_SECRET
     global SPOTIPY_REDIRECT_URI
-    global toast_thread_lock
     #print('SPOTIPY_CLIENT_ID: ' + SPOTIPY_CLIENT_ID)
     #print('SPOTIPY_CLIENT_SECRET: ' + SPOTIPY_CLIENT_SECRET)
     #print('SPOTIPY_REDIRECT_URI: ' + SPOTIPY_REDIRECT_URI)
-    with toast_thread_lock:
 
-        # Creating the Spotify client with authorization
-        sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
+    # Creating the Spotify client with authorization
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
                                                        client_secret=SPOTIPY_CLIENT_SECRET,
                                                        redirect_uri=SPOTIPY_REDIRECT_URI,
                                                        scope='user-read-playback-state'))
 
 
 
-        # Create a hidden root window
-        # Change the border color (frame color)
-        ctk.set_default_color_theme("green")  
-        root = ctk.CTk()
-        root.withdraw()
+    # Create a hidden root window
+    # Change the border color (frame color)
+    ctk.set_default_color_theme("green")  
+    root = ctk.CTk()
+    root.withdraw()
 
-        # Create the notification window
-        notification_window = ctk.CTkToplevel()
-        notification_window.configure(background='black')
-        notification_window.geometry("280x100")  # Adjust the size as needed
-        #notification_window.geometry()  # Adjust the size as needed
-        notification_window.overrideredirect(True)  # Remove window borders and title
+    # Create the notification window
+    notification_window = ctk.CTkToplevel()
+    notification_window.configure(background='black')
+    notification_window.geometry("280x100")  # Adjust the size as needed
+    #notification_window.geometry()  # Adjust the size as needed
+    notification_window.overrideredirect(True)  # Remove window borders and title
 
-        # Calculate the screen width and height
-        #screen_width = root.winfo_screenwidth() - 100
-        #screen_height = root.winfo_screenheight() + 50
+    # Calculate the screen width and height
+    #screen_width = root.winfo_screenwidth() - 100
+    #screen_height = root.winfo_screenheight() + 50
 
-        # Position the notification in the bottom-right corner
-        #x = screen_width - notification_window.winfo_reqwidth()
-        #y = screen_height - notification_window.winfo_reqheight()
-        x = 0
-        y = 0
-        notification_window.geometry("+%d+%d" % (x, y))
+    # Position the notification in the bottom-right corner
+    #x = screen_width - notification_window.winfo_reqwidth()
+    #y = screen_height - notification_window.winfo_reqheight()
+    x = 0
+    y = 0
+    notification_window.geometry("+%d+%d" % (x, y))
 
-        # Getting current playing song
-        current_track = sp.current_user_playing_track()
-        current_playback = sp.current_playback()
-        track_name = current_track['item']['name']
-        #artists_name = ', '.join([artist['name'] for artist in current_track['item']['artists']])
-        artist_name = current_track['item']['artists'][0]['name']
+    # Getting current playing song
+    current_track = sp.current_user_playing_track()
+    current_playback = sp.current_playback()
+    track_name = current_track['item']['name']
+    #artists_name = ', '.join([artist['name'] for artist in current_track['item']['artists']])
+    artist_name = current_track['item']['artists'][0]['name']
 
-        # to get transparency 
-        #canvas = ctk.CTkCanvas(notification_window, background='black', borderwidth = 0, highlightthickness = 0)
-        canvas = ctk.CTkCanvas(notification_window, background='black', highlightbackground='black')
-        # Define start and end colours and image height and width
-        # colorArr1=[30, 215, 96] # spotiy colors
-        colorArr1=[7, 53, 24]
-        colorArr2=[0, 0, 0]
-        #bg_img = gen_gradient_image(280*2, 100*2, colorArr1, colorArr2)
-        bg_img = gen_gradient_image(350, 130, colorArr1, colorArr2)
-        bg_img = ImageTk.PhotoImage(bg_img)
-        #bg_img = bg_img.resize((100, 100), Image.LANCZOS) # Resize image
-        # display bg image
-        canvas.create_image(0, 0, image=bg_img, anchor=ctk.NW)
-        # Getting album cover image URL
-        album_cover_url = current_track['item']['album']['images'][0]['url']
-        img = Image.open(requests.get(album_cover_url, stream=True).raw)
-        img = img.resize((100, 100), Image.LANCZOS) # Resize image
-        album_cover = ImageTk.PhotoImage(img)
-        # Displaying album cover image
-        canvas.create_image(10, 10, image=album_cover, anchor=ctk.NW)
+    # to get transparency 
+    #canvas = ctk.CTkCanvas(notification_window, background='black', borderwidth = 0, highlightthickness = 0)
+    canvas = ctk.CTkCanvas(notification_window, background='black', highlightbackground='black')
+    # Define start and end colours and image height and width
+    # colorArr1=[30, 215, 96] # spotiy colors
+    colorArr1=[7, 53, 24]
+    colorArr2=[0, 0, 0]
+    #bg_img = gen_gradient_image(280*2, 100*2, colorArr1, colorArr2)
+    bg_img = gen_gradient_image(350, 130, colorArr1, colorArr2)
+    bg_img = ImageTk.PhotoImage(bg_img)
+    #bg_img = bg_img.resize((100, 100), Image.LANCZOS) # Resize image
+    # display bg image
+    canvas.create_image(0, 0, image=bg_img, anchor=ctk.NW)
+    # Getting album cover image URL
+    album_cover_url = current_track['item']['album']['images'][0]['url']
+    img = Image.open(requests.get(album_cover_url, stream=True).raw)
+    img = img.resize((100, 100), Image.LANCZOS) # Resize image
+    album_cover = ImageTk.PhotoImage(img)
+    # Displaying album cover image
+    canvas.create_image(10, 10, image=album_cover, anchor=ctk.NW)
 
-        # Check if the current track is in the user's saved songs (favorites):
-        #if 'item' in current_playback and 'id' in current_playback['item']:
-        #    track_id = current_playback['item']['id']
-        #    is_saved = sp.current_user_saved_tracks_contains(tracks=[track_id])
-        #    if is_saved[0]:
-        #        print("Track is saved to the user's library (faved).")
-        #    else:
-        #        print("Track is not saved to the user's library (not faved).")
+    # Check if the current track is in the user's saved songs (favorites):
+    #if 'item' in current_playback and 'id' in current_playback['item']:
+    #    track_id = current_playback['item']['id']
+    #    is_saved = sp.current_user_saved_tracks_contains(tracks=[track_id])
+    #    if is_saved[0]:
+    #        print("Track is saved to the user's library (faved).")
+    #    else:
+    #        print("Track is not saved to the user's library (not faved).")
     
-        # Check if the current track is liked (hearted):
-        #liked_tracks = sp.current_user_saved_tracks()
-        #liked_track_ids = [track['track']['id'] for track in liked_tracks['items']]
-        #if track_id in liked_track_ids:
-        #    print("Track is liked by the user.")
-        #else:
-        #    print("Track is not liked by the user.")
+    # Check if the current track is liked (hearted):
+    #liked_tracks = sp.current_user_saved_tracks()
+    #liked_track_ids = [track['track']['id'] for track in liked_tracks['items']]
+    #if track_id in liked_track_ids:
+    #    print("Track is liked by the user.")
+    #else:
+    #    print("Track is not liked by the user.")
 
-        # TODO
-        heart = Image.open('resources/heart_empty.png')
-        heart = heart.resize((25, 25), Image.LANCZOS) # Resize image
-        heart = ImageTk.PhotoImage(heart)
-        canvas.create_image(130, 80, image=heart, anchor=ctk.NW)
+    # TODO
+    heart = Image.open('resources/heart_empty.png')
+    heart = heart.resize((25, 25), Image.LANCZOS) # Resize image
+    heart = ImageTk.PhotoImage(heart)
+    canvas.create_image(130, 80, image=heart, anchor=ctk.NW)
 
-        shuffle = current_playback['shuffle_state']
-        if shuffle == False:
-            shuffle = Image.open('resources/shuffle_off.png')
-        elif shuffle == True:
-            shuffle = Image.open('resources/shuffle_on.png')
-        shuffle = shuffle.resize((25, 25), Image.LANCZOS) # Resize image
-        shuffle = ImageTk.PhotoImage(shuffle)
-        canvas.create_image(165, 80, image=shuffle, anchor=ctk.NW)
+    shuffle = current_playback['shuffle_state']
+    if shuffle == False:
+        shuffle = Image.open('resources/shuffle_off.png')
+    elif shuffle == True:
+        shuffle = Image.open('resources/shuffle_on.png')
+    shuffle = shuffle.resize((25, 25), Image.LANCZOS) # Resize image
+    shuffle = ImageTk.PhotoImage(shuffle)
+    canvas.create_image(165, 80, image=shuffle, anchor=ctk.NW)
 
-        is_playing = current_playback['is_playing']
-        if is_playing == True:
-            play_pause = Image.open('resources/pause.png')
-        if is_playing == False:
-            play_pause = Image.open('resources/play.png')
-        play_pause = play_pause.resize((25, 25), Image.LANCZOS) # Resize image
-        play_pause = ImageTk.PhotoImage(play_pause)
-        canvas.create_image(200, 80, image=play_pause, anchor=ctk.NW)
+    is_playing = current_playback['is_playing']
+    if is_playing == True:
+        play_pause = Image.open('resources/pause.png')
+    if is_playing == False:
+        play_pause = Image.open('resources/play.png')
+    play_pause = play_pause.resize((25, 25), Image.LANCZOS) # Resize image
+    play_pause = ImageTk.PhotoImage(play_pause)
+    canvas.create_image(200, 80, image=play_pause, anchor=ctk.NW)
 
-        loop = current_playback['repeat_state']
-        if loop == 'off':
-            loop = Image.open('resources/loop_off.png')
-        elif loop == 'context':
-            loop = Image.open('resources/loop_on.png')
-        elif loop == 'track':
-            loop = Image.open('resources/loop_single.png')
-        loop = loop.resize((25, 25), Image.LANCZOS) # Resize image
-        loop = ImageTk.PhotoImage(loop)
-        canvas.create_image(235, 80, image=loop, anchor=ctk.NW)
+    loop = current_playback['repeat_state']
+    if loop == 'off':
+        loop = Image.open('resources/loop_off.png')
+    elif loop == 'context':
+        loop = Image.open('resources/loop_on.png')
+    elif loop == 'track':
+        loop = Image.open('resources/loop_single.png')
+    loop = loop.resize((25, 25), Image.LANCZOS) # Resize image
+    loop = ImageTk.PhotoImage(loop)
+    canvas.create_image(235, 80, image=loop, anchor=ctk.NW)
 
-        # Displaying currently playing song info
-        #track_info_label = ctk.CTkLabel(notification_window, text=f"{track_name}\nby: {artist_name}")
-        #track_info_label.pack(side='left', fill="both", expand=True)
-        canvas.create_text(130, 20, text=f"{track_name}\nby: {artist_name}", font=(20), fill='white', anchor=ctk.NW)
+    # Displaying currently playing song info
+    #track_info_label = ctk.CTkLabel(notification_window, text=f"{track_name}\nby: {artist_name}")
+    #track_info_label.pack(side='left', fill="both", expand=True)
+    canvas.create_text(130, 20, text=f"{track_name}\nby: {artist_name}", font=(20), fill='white', anchor=ctk.NW)
 
-        canvas.pack(side='left')
-        notification_window.after(3000, notification_window.destroy)  # Change the time as needed
-        root.after(3000, root.destroy)
-        root.mainloop()
-
+    canvas.pack(side='left')
+    notification_window.after(3000, notification_window.destroy)  # Change the time as needed
+    root.after(3000, root.destroy)
+    root.mainloop()
 
 
 def get_bundled_png_filepath(filename):
@@ -836,8 +833,6 @@ def main():
     # Create a lock for gui thread synchronization
     global thread_lock
     thread_lock = threading.Lock()
-    global toast_thread_lock
-    toast_thread_lock = threading.Lock()
     
     # Check if the configuration file exists
     if os.path.isfile('spotify_controls.ini'):
