@@ -1,1 +1,1 @@
-pyinstaller --onefile --icon="resources/kreky.ico" --add-data "resources/*;data" "Spotify Controls.py" --no-console
+pyinstaller --onefile --icon="resources/kreky.ico" --add-data "resources/*;data" "Spotify Controls.py" --noconsole
