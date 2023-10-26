@@ -174,7 +174,7 @@ def show_toast_notification():
     root.mainloop()
 
 
-def get_bundled_png_filepath(filename):
+def get_bundled_file_filepath(filename):
 # Get the path to the temporary directory where data is extracted
     data_dir = sys._MEIPASS
     
@@ -187,7 +187,7 @@ def get_bundled_png_filepath(filename):
 def load_png(filename):
     try:
         # Attempt to load an image from a bundled file
-        image_path = get_bundled_png_filepath('resources/' + filename)
+        image_path = get_bundled_file_filepath(filename)
         image = Image.open(image_path)
     except:
         # If loading from the bundled file fails, load from the folder (assume to run as script not compiled)
@@ -609,7 +609,11 @@ def config_gui():
        # app.geometry("1100x450")
         app.resizable(False, False)
         app.title("Spotify Controls by _kreken")
-        app.wm_iconbitmap('resources/kreky.ico')
+        try:
+            filepath = get_bundled_file_filepath('kreky.ico')
+            app.wm_iconbitmap(filepath)
+        except:
+            app.wm_iconbitmap('resources/kreky.ico')
         app.grid_rowconfigure(0, weight=1)
         app.grid_columnconfigure(0, weight=1)
 
