@@ -129,36 +129,36 @@ def show_toast_notification():
     #    print("Track is not liked by the user.")
 
     # TODO
-    heart = Image.open('resources/heart_empty.png')
+    heart = load_png('heart_empty.png')
     heart = heart.resize((25, 25), Image.LANCZOS) # Resize image
     heart = ImageTk.PhotoImage(heart)
     canvas.create_image(130, 80, image=heart, anchor=ctk.NW)
 
     shuffle = current_playback['shuffle_state']
     if shuffle == False:
-        shuffle = Image.open('resources/shuffle_off.png')
+        shuffle = load_png('shuffle_off.png')
     elif shuffle == True:
-        shuffle = Image.open('resources/shuffle_on.png')
+        shuffle = load_png('shuffle_on.png')
     shuffle = shuffle.resize((25, 25), Image.LANCZOS) # Resize image
     shuffle = ImageTk.PhotoImage(shuffle)
     canvas.create_image(165, 80, image=shuffle, anchor=ctk.NW)
 
     is_playing = current_playback['is_playing']
     if is_playing == True:
-        play_pause = Image.open('resources/pause.png')
+        play_pause = load_png('pause.png')
     if is_playing == False:
-        play_pause = Image.open('resources/play.png')
+        play_pause = load_png('play.png')
     play_pause = play_pause.resize((25, 25), Image.LANCZOS) # Resize image
     play_pause = ImageTk.PhotoImage(play_pause)
     canvas.create_image(200, 80, image=play_pause, anchor=ctk.NW)
 
     loop = current_playback['repeat_state']
     if loop == 'off':
-        loop = Image.open('resources/loop_off.png')
+        loop = load_png('loop_off.png')
     elif loop == 'context':
-        loop = Image.open('resources/loop_on.png')
+        loop = load_png('loop_on.png')
     elif loop == 'track':
-        loop = Image.open('resources/loop_single.png')
+        loop = load_png('loop_single.png')
     loop = loop.resize((25, 25), Image.LANCZOS) # Resize image
     loop = ImageTk.PhotoImage(loop)
     canvas.create_image(235, 80, image=loop, anchor=ctk.NW)
@@ -183,6 +183,17 @@ def get_bundled_png_filepath(filename):
 
     return png_file_path
 
+# TODO finish this
+def load_png(filename):
+    try:
+        # Attempt to load an image from a bundled file
+        image_path = get_bundled_png_filepath('resources/' + filename)
+        image = Image.open(image_path)
+    except:
+        # If loading from the bundled file fails, load from the folder (assume to run as script not compiled)
+        image = Image.open('resources/' + filename)
+    return image
+    
 
 # Create a ConfigParser object
 config = configparser.ConfigParser()
@@ -703,14 +714,7 @@ def run_tray():
     # Create the system tray icon and menu
     #print('launching tray...')
     global tray_icon
-    try:
-        # Attempt to load an image from a bundled file
-        image_path = get_bundled_png_filepath("resources/kreky.png")
-        image = Image.open(image_path)
-    except:
-        # If loading from the bundled file fails, load from the folder (assume to run as script not compiled)
-        image = Image.open("resources/kreky.png")
-
+    image = load_png('kreky.png')
     # Define the menu items for the system tray icon
     menu = (item('Open Settings', show_window), item('Close', quit_window))
     # Create the system tray icon with the specified image and menu items
