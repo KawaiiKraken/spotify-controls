@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole --icon=kreky.ico --add-data "tray_logo.png;data" .\spotifyControls.py
+pyinstaller --onefile --noconsole --icon="resources/kreky.ico" --add-data "resources/*.png;data" "Spotify Controls.py"
