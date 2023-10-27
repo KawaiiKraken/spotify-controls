@@ -47,9 +47,6 @@ def show_toast_notification():
     global SPOTIPY_CLIENT_ID
     global SPOTIPY_CLIENT_SECRET
     global SPOTIPY_REDIRECT_URI
-    #print('SPOTIPY_CLIENT_ID: ' + SPOTIPY_CLIENT_ID)
-    #print('SPOTIPY_CLIENT_SECRET: ' + SPOTIPY_CLIENT_SECRET)
-    #print('SPOTIPY_REDIRECT_URI: ' + SPOTIPY_REDIRECT_URI)
 
     # Creating the Spotify client with authorization
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=SPOTIPY_CLIENT_ID,
@@ -111,15 +108,6 @@ def show_toast_notification():
     # Displaying album cover image
     canvas.create_image(10, 10, image=album_cover, anchor=ctk.NW)
 
-    # Check if the current track is in the user's saved songs (favorites):
-    #if 'item' in current_playback and 'id' in current_playback['item']:
-    #    track_id = current_playback['item']['id']
-    #    is_saved = sp.current_user_saved_tracks_contains(tracks=[track_id])
-    #    if is_saved[0]:
-    #        print("Track is saved to the user's library (faved).")
-    #    else:
-    #        print("Track is not saved to the user's library (not faved).")
-    
     # Check if the current track is liked (hearted):
     #liked_tracks = sp.current_user_saved_tracks()
     #liked_track_ids = [track['track']['id'] for track in liked_tracks['items']]
@@ -164,8 +152,6 @@ def show_toast_notification():
     canvas.create_image(235, 80, image=loop, anchor=ctk.NW)
 
     # Displaying currently playing song info
-    #track_info_label = ctk.CTkLabel(notification_window, text=f"{track_name}\nby: {artist_name}")
-    #track_info_label.pack(side='left', fill="both", expand=True)
     canvas.create_text(130, 20, text=f"{track_name}\nby: {artist_name}", font=(20), fill='white', anchor=ctk.NW)
 
     canvas.pack(side='left')
@@ -198,7 +184,6 @@ def load_png(filename):
 # Create a ConfigParser object
 config = configparser.ConfigParser()
 def set_config():
-    #print('setting config...')
     # Define global variables to be used in the function
     global pause_bind
     global vol_up_bind
@@ -213,7 +198,6 @@ def set_config():
     global SPOTIPY_CLIENT_ID
     global SPOTIPY_CLIENT_SECRET
     global SPOTIPY_REDIRECT_URI
-    #print('pause_bind: ' + pause_bind)
 
     # Check if the 'spotify_controls.ini' file exists
     # If it doesn't exist, create it and set the initial configuration
@@ -295,7 +279,6 @@ def send_keys_to_spotify(keys):
 
     # Choose the first Spotify window 
     hwnd = hwnds[0] 
-    #print('hwnd: ' + str(hwnd))
 
     # Check if a valid window handle was obtained
     if ((hwnd != 0) and (hwnd != None)):
@@ -340,7 +323,6 @@ def get_window_hwnds_by_executable_name(target_executable_name):
                 ctypes.windll.psapi.GetModuleFileNameExA(h_process, 0, executable_path, ctypes.sizeof(executable_path))
                 # Extract the executable name from the path
                 executable_name = os.path.basename(executable_path.value.decode())
-                #print(executable_name + "(" + str(hwnd) + ")")
                 
                 # Close the process handle
                 ctypes.windll.kernel32.CloseHandle(h_process)
@@ -350,7 +332,6 @@ def get_window_hwnds_by_executable_name(target_executable_name):
                     #print("returned hwnd: " + str(hwnd) + " for exe: " + executable_name + "(" + str(pid) + ")")
                     window_hwnd.append(hwnd) 
         except Exception as e:
-            #print("Error: " + str(e))
             pass
         return True 
     # Enumerate all top-level windows and filter by executable name
@@ -375,46 +356,24 @@ def spotifyHide():
 def bind_keys(label, labal_text, result, result_event):
     # Update the label with user instructions
     label.configure(text="Press keys to bind...")
-
     # Initialize a variable to store the key binding
     bind = ''
     while True:
         event = keyboard.read_event()
-
-        # on keydown
         if event.event_type == keyboard.KEY_DOWN:
-            #print('keydown:' + event.name)
             # check if key was already added to hotkey
             if bind.find(event.name) == -1:
                 # if not found add the key
-                bind += '+' 
-                bind += event.name
-
-        # clean up the resulting string
-        bind = bind.replace('++', '+')
-        if len(bind) > 0:
-            if bind[0] == '+':
-                if len(bind) > 1:
+                bind += '+' + event.name
+                if bind[0] == '+':
                     bind = bind[1:]
-                else:
-                    bind = ''
 
-        if len(bind) > 1:
-            last_index = len(bind)-1
-            if bind[last_index] == '+':
-                bind = bind[:last_index-1]
-
-        # on KEY_UP event
         if event.event_type == keyboard.KEY_UP:
-            #print('keyup: ' + event.name)
-            # Key release event means hotkey is set; exit the loop
             break
 
         # Update the label with the current key binding
         label.configure(text=labal_text + ": " + bind)
 
-    #print("returned bind")
-    # Store the final key binding in the result list
     result[0] = bind
     # signal that result is set and thread has exited 
     result_event.set()
@@ -423,19 +382,14 @@ def bind_keys(label, labal_text, result, result_event):
 def bind_pause(label):
     # Access the global hotkey variable
     global pause_bind
-
     # Create an event to signal when the key binding is ready
     result_event = threading.Event()
-
     # Initialize a list to store the key binding
     result = [None]
-
     # Create a new thread to run the bind_keys function
     thread = threading.Thread(target=bind_keys, args=(label, "pause", result, result_event))
-
     # Start the thread to begin key binding
     thread.start()
-
     # Wait for the key binding to be completed and signaled
     result_event.wait()
     # Store the obtained hotkey binding in the global variable
@@ -586,7 +540,6 @@ def config_gui():
     global thread_lock
     # make sure only one gui thread is running at a time
     with thread_lock:
-        #print('launching config gui...')
         # Define global variables to be used in the function
         global pause_bind
         global vol_up_bind
@@ -694,7 +647,6 @@ def config_gui():
 
         # Set weights (relative size) for grid rows and columns
         for i in range(10):
-            #print("centering row: " + str(round(i/2)*2) + ', column: ' + str(i))
             frame_1.grid_rowconfigure(round(i/2)*2, weight=2)
             frame_1.grid_rowconfigure(round(i/2)*2+1, weight=2)
             frame_1.grid_columnconfigure(i, weight=2)
@@ -716,7 +668,6 @@ def show_window(tray_icon, item):
 
 def run_tray():
     # Create the system tray icon and menu
-    #print('launching tray...')
     global tray_icon
     image = load_png('kreky.png')
     # Define the menu items for the system tray icon
@@ -727,7 +678,6 @@ def run_tray():
     tray_icon.run()
 
 def set_hotkeys():
-    #print('setting up hotkeys...')
     # Define global variables to be used in the function
     global pause_bind
     global vol_up_bind
@@ -761,45 +711,33 @@ def set_hotkeys():
     if pause_bind != '':
         # Add hotkey for toggling pause with the specified key combination... same thing for other ones, won't comment
         keyboard.add_hotkey(pause_bind,          lambda: send_keys_to_spotify(TOGGLE_PAUSE),    suppress=True, timeout=0, trigger_on_release=False )
-        #print('set pause to ' + pause_bind)
 
     if vol_up_bind != '':
         keyboard.add_hotkey(vol_up_bind,         lambda: send_keys_to_spotify(VOLUME_UP),       suppress=True, timeout=0, trigger_on_release=False )
-        #print('set volup to ' + vol_up_bind)
 
     if vol_down_bind != '':
         keyboard.add_hotkey(vol_down_bind,       lambda: send_keys_to_spotify(VOLUME_DOWN),     suppress=True, timeout=0, trigger_on_release=False )
-        #print('set voldown to ' + vol_down_bind)
 
     if next_track_bind != '':
         keyboard.add_hotkey(next_track_bind,     lambda: send_keys_to_spotify(NEXT_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
-        #print('set next track to ' + next_track_bind)
 
     if prev_track_bind != '':
         keyboard.add_hotkey(prev_track_bind,     lambda: send_keys_to_spotify(PREV_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
-        #print('set prev track to ' + prev_track_bind)
 
     if like_track_bind != '':
         keyboard.add_hotkey(like_track_bind,     lambda: send_keys_to_spotify(LIKE_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
-        #print('set like track to ' + like_track_bind)
 
     if toggle_shuffle_bind != '':
         keyboard.add_hotkey(toggle_shuffle_bind, lambda: send_keys_to_spotify(TOGGLE_SHUFFLE),  suppress=True, timeout=0, trigger_on_release=False )
-        #print('set shuffle to ' + toggle_shuffle_bind)
 
     if toggle_repeat_bind != '':
         keyboard.add_hotkey(toggle_repeat_bind,  lambda: send_keys_to_spotify(TOGGLE_REPEAT),   suppress=True, timeout=0, trigger_on_release=False )
-        #print('set repeat to ' + toggle_repeat_bind)
 
     if seek_forw_bind != '':
         keyboard.add_hotkey(seek_forw_bind,      lambda: send_keys_to_spotify(SEEK_FORWD),      suppress=True, timeout=0, trigger_on_release=False )
-        #print('set seek forward to ' + seek_forw_bind)
 
     if seek_backw_bind != '':
         keyboard.add_hotkey(seek_backw_bind,     lambda: send_keys_to_spotify(SEEK_BACKW),      suppress=True, timeout=0, trigger_on_release=False )
-        #print('set seek back to ' + seek_backw_bind)
-
-    #keyboard.add_hotkey( 'ctrl+m', spotifyHide, args = ( ) )
 
 
 def main():
@@ -844,14 +782,10 @@ def main():
     
     # Check if the configuration file exists
     if os.path.isfile('spotify_controls.ini'):
-        #print('config file found')
-        #print('reading config...')
-        # Configuration file exists, so read the configuration
         readConfig()
         # set hotkeys to config
         set_hotkeys()
     else:
-        #print('config file not found')
         # Configuration file doesn't exist, so launch the config GUI in a separate thread
         threading.Thread(target=config_gui, args=()).start()
 
