@@ -28,7 +28,6 @@ from PIL import Image
 #from timeout_decorator import timeout
 
 def gen_gradient_image(width, height, colorArr1, colorArr2):
-
     # Make output image
     gradient = np.zeros((height, width, 3), np.uint8)
 
@@ -53,8 +52,6 @@ def show_toast_notification():
                                                        client_secret=SPOTIPY_CLIENT_SECRET,
                                                        redirect_uri=SPOTIPY_REDIRECT_URI,
                                                        scope='user-read-playback-state'))
-
-
 
     # Create a hidden root window
     # Change the border color (frame color)
@@ -554,12 +551,10 @@ def config_gui():
 
         # Initialize and configure the graphical user interface
         ctk.set_appearance_mode("dark")  
-        #ctk.set_default_color_theme("blue")  
         ctk.set_default_color_theme("green")  
 
         # Create the main application window
         app = ctk.CTk()
-       # app.geometry("1100x450")
         app.resizable(False, False)
         app.title("Spotify Controls by _kreken")
         try:
@@ -645,7 +640,7 @@ def config_gui():
         macro10_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_seek_backw, args=(macro10_label,)).start())
         macro10_button.grid(row=2, column=3, padx=20, pady=(0, 15))
 
-        # Set weights (relative size) for grid rows and columns
+        # allign so it looks good
         for i in range(10):
             frame_1.grid_rowconfigure(round(i/2)*2, weight=2)
             frame_1.grid_rowconfigure(round(i/2)*2+1, weight=2)
@@ -656,10 +651,8 @@ def config_gui():
     
     
 def quit_window(tray_icon, item):
-    # Stop the tray icon (system tray) to prevent weird behavior
+    # Stop the tray to prevent weird behavior
     tray_icon.stop()
-
-    # Call the `quit2` function to perform any additional cleanup or exit actions (aka make it not freeze with exit() lmao)
     quit2()
 
 def show_window(tray_icon, item):
@@ -756,12 +749,12 @@ def main():
     global SPOTIPY_CLIENT_ID
     global SPOTIPY_CLIENT_SECRET
     global SPOTIPY_REDIRECT_URI
+
     
     # obv dont do it HERE, put it in the config file
     SPOTIPY_CLIENT_ID = 'put you client id here'
     SPOTIPY_CLIENT_SECRET = 'put you client secret here'
     SPOTIPY_REDIRECT_URI = 'put you redirect uri here'
-
 
     # Initialize hotkey bindings to empty strings (prevents error when saving empty hotkeys to config)
     pause_bind = ''
@@ -774,7 +767,6 @@ def main():
     toggle_repeat_bind = ''
     seek_forw_bind = ''
     seek_backw_bind = ''
-
 
     # Create a lock for gui thread synchronization
     global thread_lock
