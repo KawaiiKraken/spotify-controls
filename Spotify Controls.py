@@ -41,7 +41,6 @@ def gen_gradient_image(width, height, colorArr1, colorArr2):
     return img
 
 
-
 def show_toast_notification():
     global SPOTIPY_CLIENT_ID
     global SPOTIPY_CLIENT_SECRET
@@ -63,7 +62,6 @@ def show_toast_notification():
     notification_window = ctk.CTkToplevel()
     notification_window.configure(background='black')
     notification_window.geometry("280x100")  # Adjust the size as needed
-    #notification_window.geometry()  # Adjust the size as needed
     notification_window.overrideredirect(True)  # Remove window borders and title
 
     # Calculate the screen width and height
@@ -81,7 +79,6 @@ def show_toast_notification():
     current_track = sp.current_user_playing_track()
     current_playback = sp.current_playback()
     track_name = current_track['item']['name']
-    #artists_name = ', '.join([artist['name'] for artist in current_track['item']['artists']])
     artist_name = current_track['item']['artists'][0]['name']
 
     # to get transparency 
@@ -91,7 +88,6 @@ def show_toast_notification():
     # colorArr1=[30, 215, 96] # spotiy colors
     colorArr1=[7, 53, 24]
     colorArr2=[0, 0, 0]
-    #bg_img = gen_gradient_image(280*2, 100*2, colorArr1, colorArr2)
     bg_img = gen_gradient_image(350, 130, colorArr1, colorArr2)
     bg_img = ImageTk.PhotoImage(bg_img)
     #bg_img = bg_img.resize((100, 100), Image.LANCZOS) # Resize image
@@ -166,6 +162,7 @@ def get_bundled_file_filepath(filename):
 
     return png_file_path
 
+
 # TODO finish this
 def load_png(filename):
     try:
@@ -198,16 +195,16 @@ def set_config():
 
     # Check if the 'spotify_controls.ini' file exists
     # If it doesn't exist, create it and set the initial configuration
-    config['hotkeys'] = {'pause_bind': pause_bind,
-                        'vol_up_bind': vol_up_bind,
-                        'vol_down_bind': vol_down_bind,
-                        'next_track_bind': next_track_bind,
-                        'prev_track_bind': prev_track_bind,
-                        'like_track_bind': like_track_bind,
-                        'toggle_shuffle_bind': toggle_shuffle_bind,
-                        'toggle_repeat_bind': toggle_repeat_bind,
-                        'seek_forw_bind': seek_forw_bind,
-                        'seek_backw_bind': seek_backw_bind
+    config['hotkeys'] = {'pause_bind': pause_bind.bind,
+                        'vol_up_bind': vol_up_bind.bind,
+                        'vol_down_bind': vol_down_bind.bind,
+                        'next_track_bind': next_track_bind.bind,
+                        'prev_track_bind': prev_track_bind.bind,
+                        'like_track_bind': like_track_bind.bind,
+                        'toggle_shuffle_bind': toggle_shuffle_bind.bind,
+                        'toggle_repeat_bind': toggle_repeat_bind.bind,
+                        'seek_forw_bind': seek_forw_bind.bind,
+                        'seek_backw_bind': seek_backw_bind.bind
                         }
     config['spotify_creds'] = {'SPOTIPY_CLIENT_ID' : SPOTIPY_CLIENT_ID,
                                 'SPOTIPY_CLIENT_SECRET' : SPOTIPY_CLIENT_SECRET,
@@ -242,16 +239,16 @@ def readConfig():
     hotkeys = config['hotkeys']
 
     # Retrieve and assign the values of each configuration setting
-    pause_bind = hotkeys['pause_bind']
-    vol_up_bind = hotkeys['vol_up_bind']
-    vol_down_bind = hotkeys['vol_down_bind']
-    next_track_bind = hotkeys['next_track_bind']
-    prev_track_bind = hotkeys['prev_track_bind']
-    like_track_bind = hotkeys['like_track_bind']
-    toggle_shuffle_bind = hotkeys['toggle_shuffle_bind']
-    toggle_repeat_bind = hotkeys['toggle_repeat_bind']
-    seek_forw_bind = hotkeys['seek_forw_bind']
-    seek_backw_bind = hotkeys['seek_backw_bind']
+    pause_bind.bind = hotkeys['pause_bind']
+    vol_up_bind.bind = hotkeys['vol_up_bind']
+    vol_down_bind.bind = hotkeys['vol_down_bind']
+    next_track_bind.bind = hotkeys['next_track_bind']
+    prev_track_bind.bind = hotkeys['prev_track_bind']
+    like_track_bind.bind = hotkeys['like_track_bind']
+    toggle_shuffle_bind.bind = hotkeys['toggle_shuffle_bind']
+    toggle_repeat_bind.bind = hotkeys['toggle_repeat_bind']
+    seek_forw_bind.bind = hotkeys['seek_forw_bind']
+    seek_backw_bind.bind = hotkeys['seek_backw_bind']
 
     spotify_creds = config['spotify_creds']
     SPOTIPY_CLIENT_ID = spotify_creds['SPOTIPY_CLIENT_ID']
@@ -350,152 +347,33 @@ def spotifyHide():
     for hwnd in hwnds:
         ctypes.windll.user32.ShowWindow(hwnd, SW_MINIMIZE)
 
-def bind_keys(label, labal_text, result, result_event):
+class hotkey:
+    def __init__(self):
+        self.bind = '' 
+
+def bind_keys(label, label_text, hotkey_class, result_event=None):
     # Update the label with user instructions
     label.configure(text="Press keys to bind...")
     # Initialize a variable to store the key binding
-    bind = ''
+    hotkey_class.bind = ''
     while True:
         event = keyboard.read_event()
         if event.event_type == keyboard.KEY_DOWN:
             # check if key was already added to hotkey
-            if bind.find(event.name) == -1:
+            if hotkey_class.bind.find(event.name) == -1:
                 # if not found add the key
-                bind += '+' + event.name
-                if bind[0] == '+':
-                    bind = bind[1:]
+                hotkey_class.bind += '+' + event.name
+                if hotkey_class.bind[0] == '+':
+                    hotkey_class.bind = hotkey_class.bind[1:]
 
         if event.event_type == keyboard.KEY_UP:
             break
 
         # Update the label with the current key binding
-        label.configure(text=labal_text + ": " + bind)
-
-    result[0] = bind
-    # signal that result is set and thread has exited 
-    result_event.set()
-
-# comments for all the following bind_* functions are the same so i will only comment this one
-def bind_pause(label):
-    # Access the global hotkey variable
-    global pause_bind
-    # Create an event to signal when the key binding is ready
-    result_event = threading.Event()
-    # Initialize a list to store the key binding
-    result = [None]
-    # Create a new thread to run the bind_keys function
-    thread = threading.Thread(target=bind_keys, args=(label, "pause", result, result_event))
-    # Start the thread to begin key binding
-    thread.start()
-    # Wait for the key binding to be completed and signaled
-    result_event.wait()
-    # Store the obtained hotkey binding in the global variable
-    pause_bind = result[0]
-    # activate the hotkeys 
-    set_hotkeys()
-    # attempt to save the configuration
-    set_config()
-
-def bind_vol_up(label):
-    global vol_up_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "volume up", result, result_event))
-    thread.start()
-    result_event.wait()
-    vol_up_bind = result[0]
+        label.configure(text=label_text + hotkey_class.bind)
     set_hotkeys()
     set_config()
 
-def bind_vol_down(label):
-    global vol_down_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "volume down", result, result_event))
-    thread.start()
-    result_event.wait()
-    vol_down_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-def bind_next_track(label):
-    global next_track_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "next track", result, result_event))
-    thread.start()
-    result_event.wait()
-    next_track_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-
-def bind_prev_track(label):
-    global prev_track_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "previous track", result, result_event))
-    thread.start()
-    result_event.wait()
-    prev_track_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-def bind_like_track(label):
-    global like_track_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "like track", result, result_event))
-    thread.start()
-    result_event.wait()
-    like_track_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-def bind_toggle_shuffle(label):
-    global toggle_shuffle_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "toggle shuffle", result, result_event))
-    thread.start()
-    result_event.wait()
-    toggle_shuffle_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-def bind_toggle_repeat(label):
-    global toggle_repeat_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "toggle repeat", result, result_event))
-    thread.start()
-    result_event.wait()
-    toggle_repeat_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-def bind_seek_forw(label):
-    global seek_forw_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "seek forward", result, result_event))
-    thread.start()
-    result_event.wait()
-    seek_forw_bind = result[0]
-    set_hotkeys()
-    set_config()
-
-def bind_seek_backw(label):
-    global seek_backw_bind
-    result_event = threading.Event()
-    result = [None]
-    thread = threading.Thread(target=bind_keys, args=(label, "seek backward", result, result_event))
-    thread.start()
-    result_event.wait()
-    seek_backw_bind = result[0]
-    set_hotkeys()
-    set_config()
-    
 
 def join_server():
     # Open a web browser and navigate to the specified URL
@@ -590,54 +468,54 @@ def config_gui():
         frame_1.pack(pady=20, padx=60, fill="both", expand=True)
 
         # Create labels and buttons for each hotkey configuration
-        macro1_label = ctk.CTkLabel(master=frame_1, text="pause: " + pause_bind)
+        macro1_label = ctk.CTkLabel(master=frame_1, text="pause: " + pause_bind.bind)
         macro1_label.grid(row=1, column=0, padx=20, pady=(15, 0))
-        macro1_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_pause, args=(macro1_label,)).start())
+        macro1_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro1_label, "pause: ", pause_bind)).start())
         macro1_button.grid(row=2, column=0, padx=20, pady=(0, 15))
     
-        macro2_label = ctk.CTkLabel(master=frame_1, text="volume up: " + vol_up_bind)
+        macro2_label = ctk.CTkLabel(master=frame_1, text="volume up: " + vol_up_bind.bind)
         macro2_label.grid(row=3, column=0, padx=20, pady=(15, 0))
-        macro2_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_vol_up, args=(macro2_label,)).start())
+        macro2_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro2_label, "volume up: ", vol_up_bind)).start())
         macro2_button.grid(row=4, column=0, padx=20, pady=(0, 15))
 
-        macro3_label = ctk.CTkLabel(master=frame_1, text="volume down: " + vol_down_bind)
+        macro3_label = ctk.CTkLabel(master=frame_1, text="volume down: " + vol_down_bind.bind)
         macro3_label.grid(row=5, column=0, padx=20, pady=(15, 0))
-        macro3_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_vol_down, args=(macro3_label,)).start())
+        macro3_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro3_label, "volume down: ", vol_down_bind)).start())
         macro3_button.grid(row=6, column=0, padx=20, pady=(0, 15))
 
-        macro4_label = ctk.CTkLabel(master=frame_1, text="next track: " + next_track_bind)
+        macro4_label = ctk.CTkLabel(master=frame_1, text="next track: " + next_track_bind.bind)
         macro4_label.grid(row=1, column=1, padx=20, pady=(15, 0))
-        macro4_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_next_track, args=(macro4_label,)).start())
+        macro4_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro4_label, "next track: ", next_track_bind)).start())
         macro4_button.grid(row=2, column=1, padx=20, pady=(0, 15))
 
-        macro5_label = ctk.CTkLabel(master=frame_1, text="previous track: " + prev_track_bind)
+        macro5_label = ctk.CTkLabel(master=frame_1, text="previous track: " + prev_track_bind.bind)
         macro5_label.grid(row=3, column=1, padx=20, pady=(15, 0))
-        macro5_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_prev_track, args=(macro5_label,)).start())
+        macro5_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro5_label, "previous track: ", prev_track_bind)).start())
         macro5_button.grid(row=4, column=1, padx=20, pady=(0, 15))
 
-        macro6_label = ctk.CTkLabel(master=frame_1, text="like track: " + like_track_bind)
+        macro6_label = ctk.CTkLabel(master=frame_1, text="like track: " + like_track_bind.bind)
         macro6_label.grid(row=5, column=1, padx=20, pady=(15, 0))
-        macro6_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_like_track, args=(macro6_label,)).start())
+        macro6_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro6_label, "like track: ", like_track_bind)).start())
         macro6_button.grid(row=6, column=1, padx=20, pady=(0, 15))
 
-        macro7_label = ctk.CTkLabel(master=frame_1, text="toggle shuffle: " + toggle_shuffle_bind)
+        macro7_label = ctk.CTkLabel(master=frame_1, text="toggle shuffle: " + toggle_shuffle_bind.bind)
         macro7_label.grid(row=1, column=2, padx=20, pady=(15, 0))
-        macro7_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_toggle_shuffle, args=(macro7_label,)).start())
+        macro7_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro7_label, "toggle shuffle: ", toggle_shuffle_bind)).start())
         macro7_button.grid(row=2, column=2, padx=20, pady=(0, 15))
 
-        macro8_label = ctk.CTkLabel(master=frame_1, text="toggle repeat: " + toggle_repeat_bind)
+        macro8_label = ctk.CTkLabel(master=frame_1, text="toggle repeat: " + toggle_repeat_bind.bind)
         macro8_label.grid(row=3, column=2, padx=20, pady=(15, 0))
-        macro8_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_toggle_repeat, args=(macro8_label,)).start())
+        macro8_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro8_label, "toggle repeat: ", toggle_repeat_bind)).start())
         macro8_button.grid(row=4, column=2, padx=20, pady=(0, 15))
 
-        macro9_label = ctk.CTkLabel(master=frame_1, text="seek forward: " + seek_forw_bind)
+        macro9_label = ctk.CTkLabel(master=frame_1, text="seek forward: " + seek_forw_bind.bind)
         macro9_label.grid(row=5, column=2, padx=20, pady=(15, 0))
-        macro9_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_seek_forw, args=(macro9_label,)).start())
+        macro9_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro9_label, "seek forward: ", seek_forw_bind)).start())
         macro9_button.grid(row=6, column=2, padx=20, pady=(0, 15))
 
-        macro10_label = ctk.CTkLabel(master=frame_1, text="seek backward: " + seek_backw_bind)
+        macro10_label = ctk.CTkLabel(master=frame_1, text="seek backward: " + seek_backw_bind.bind)
         macro10_label.grid(row=1, column=3, padx=20, pady=(15, 0))
-        macro10_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_seek_backw, args=(macro10_label,)).start())
+        macro10_button = ctk.CTkButton(master=frame_1, text="Bind Key", command=lambda: threading.Thread(target=bind_keys, args=(macro10_label, "seek forward: ", seek_backw_bind)).start())
         macro10_button.grid(row=2, column=3, padx=20, pady=(0, 15))
 
         # allign so it looks good
@@ -701,36 +579,36 @@ def set_hotkeys():
     except:
         pass
 
-    if pause_bind != '':
+    if pause_bind.bind != '':
         # Add hotkey for toggling pause with the specified key combination... same thing for other ones, won't comment
-        keyboard.add_hotkey(pause_bind,          lambda: send_keys_to_spotify(TOGGLE_PAUSE),    suppress=True, timeout=0, trigger_on_release=False )
+        keyboard.add_hotkey(pause_bind.bind,          lambda: send_keys_to_spotify(TOGGLE_PAUSE),    suppress=True, timeout=0, trigger_on_release=False )
 
-    if vol_up_bind != '':
-        keyboard.add_hotkey(vol_up_bind,         lambda: send_keys_to_spotify(VOLUME_UP),       suppress=True, timeout=0, trigger_on_release=False )
+    if vol_up_bind.bind != '':
+        keyboard.add_hotkey(vol_up_bind.bind,         lambda: send_keys_to_spotify(VOLUME_UP),       suppress=True, timeout=0, trigger_on_release=False )
 
-    if vol_down_bind != '':
-        keyboard.add_hotkey(vol_down_bind,       lambda: send_keys_to_spotify(VOLUME_DOWN),     suppress=True, timeout=0, trigger_on_release=False )
+    if vol_down_bind.bind != '':
+        keyboard.add_hotkey(vol_down_bind.bind,       lambda: send_keys_to_spotify(VOLUME_DOWN),     suppress=True, timeout=0, trigger_on_release=False )
 
-    if next_track_bind != '':
-        keyboard.add_hotkey(next_track_bind,     lambda: send_keys_to_spotify(NEXT_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
+    if next_track_bind.bind != '':
+        keyboard.add_hotkey(next_track_bind.bind,     lambda: send_keys_to_spotify(NEXT_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
 
-    if prev_track_bind != '':
-        keyboard.add_hotkey(prev_track_bind,     lambda: send_keys_to_spotify(PREV_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
+    if prev_track_bind.bind != '':
+        keyboard.add_hotkey(prev_track_bind.bind,     lambda: send_keys_to_spotify(PREV_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
 
-    if like_track_bind != '':
-        keyboard.add_hotkey(like_track_bind,     lambda: send_keys_to_spotify(LIKE_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
+    if like_track_bind.bind != '':
+        keyboard.add_hotkey(like_track_bind.bind,     lambda: send_keys_to_spotify(LIKE_TRACK),      suppress=True, timeout=0, trigger_on_release=False )
 
-    if toggle_shuffle_bind != '':
-        keyboard.add_hotkey(toggle_shuffle_bind, lambda: send_keys_to_spotify(TOGGLE_SHUFFLE),  suppress=True, timeout=0, trigger_on_release=False )
+    if toggle_shuffle_bind.bind != '':
+        keyboard.add_hotkey(toggle_shuffle_bind.bind, lambda: send_keys_to_spotify(TOGGLE_SHUFFLE),  suppress=True, timeout=0, trigger_on_release=False )
 
-    if toggle_repeat_bind != '':
-        keyboard.add_hotkey(toggle_repeat_bind,  lambda: send_keys_to_spotify(TOGGLE_REPEAT),   suppress=True, timeout=0, trigger_on_release=False )
+    if toggle_repeat_bind.bind != '':
+        keyboard.add_hotkey(toggle_repeat_bind.bind,  lambda: send_keys_to_spotify(TOGGLE_REPEAT),   suppress=True, timeout=0, trigger_on_release=False )
 
-    if seek_forw_bind != '':
-        keyboard.add_hotkey(seek_forw_bind,      lambda: send_keys_to_spotify(SEEK_FORWD),      suppress=True, timeout=0, trigger_on_release=False )
+    if seek_forw_bind.bind != '':
+        keyboard.add_hotkey(seek_forw_bind.bind,      lambda: send_keys_to_spotify(SEEK_FORWD),      suppress=True, timeout=0, trigger_on_release=False )
 
-    if seek_backw_bind != '':
-        keyboard.add_hotkey(seek_backw_bind,     lambda: send_keys_to_spotify(SEEK_BACKW),      suppress=True, timeout=0, trigger_on_release=False )
+    if seek_backw_bind.bind != '':
+        keyboard.add_hotkey(seek_backw_bind.bind,     lambda: send_keys_to_spotify(SEEK_BACKW),      suppress=True, timeout=0, trigger_on_release=False )
 
 
 def main():
@@ -757,29 +635,30 @@ def main():
     SPOTIPY_REDIRECT_URI = 'put you redirect uri here'
 
     # Initialize hotkey bindings to empty strings (prevents error when saving empty hotkeys to config)
-    pause_bind = ''
-    vol_up_bind = ''
-    vol_down_bind = ''
-    next_track_bind = ''
-    prev_track_bind = ''
-    like_track_bind = ''
-    toggle_shuffle_bind = ''
-    toggle_repeat_bind = ''
-    seek_forw_bind = ''
-    seek_backw_bind = ''
+    pause_bind = hotkey()
+    vol_up_bind = hotkey() 
+    vol_down_bind = hotkey()
+    next_track_bind = hotkey()
+    prev_track_bind = hotkey()
+    like_track_bind = hotkey()
+    toggle_shuffle_bind = hotkey()
+    toggle_repeat_bind = hotkey()
+    seek_forw_bind = hotkey()
+    seek_backw_bind = hotkey()
 
     # Create a lock for gui thread synchronization
     global thread_lock
     thread_lock = threading.Lock()
     
+    threading.Thread(target=config_gui, args=()).start() # debug reasons
     # Check if the configuration file exists
-    if os.path.isfile('spotify_controls.ini'):
-        readConfig()
+    #if os.path.isfile('spotify_controls.ini'):
+        #readConfig()
         # set hotkeys to config
-        set_hotkeys()
-    else:
+    #    set_hotkeys()
+    #else:
         # Configuration file doesn't exist, so launch the config GUI in a separate thread
-        threading.Thread(target=config_gui, args=()).start()
+    #    threading.Thread(target=config_gui, args=()).start()
 
     # Run the system tray icon
     run_tray()
