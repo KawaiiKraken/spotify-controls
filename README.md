@@ -1,5 +1,6 @@
 # spotify-controls
 lmao just use https://gist.github.com/KawaiiKraken/9ab320e57e88990f39ae271dbc22e223
+
 control spotify with hotkeys NO PREMIUM REQUIRED
 
 made with the help of LeopoldPrime, SniperAstra, Zenith
